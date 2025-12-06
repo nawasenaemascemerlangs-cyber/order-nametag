@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Order Nametag Online</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header-app { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 2rem 0; margin-bottom: 2rem; border-radius: 0 0 20px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .category-title { background-color: #e9ecef; padding: 10px 15px; border-left: 5px solid #2a5298; font-weight: bold; margin-top: 20px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .product-card { background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 15px; transition: transform 0.2s; }
+        .product-card:hover { border-color: #2a5298; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .price-tag { font-weight: bold; color: #198754; font-size: 1.1rem; }
+        .total-sticky { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; border-top: 1px solid #ccc; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        .input-group-text { background-color: #f1f3f5; }
+        textarea { resize: none; font-size: 0.9rem; }
+        .char-count { font-size: 0.75rem; color: #6c757d; text-align: right; }
+        /* Spacer untuk agar konten tidak tertutup footer */
+        .spacer-bottom { height: 100px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-app text-center">
+        <div class="container">
+            <h1>Aplikasi Order Nametag</h1>
+            <p class="lead mb-0">Silakan isi jumlah pesanan dan keterangan di bawah ini</p>
+        </div>
+    </div>
+
+    <div class="container" id="product-container">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white fw-bold">Data Pemesan</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Pemesan</label>
+                        <input type="text" id="custName" class="form-control" placeholder="Nama Lengkap">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nomor WhatsApp</label>
+                        <input type="number" id="custPhone" class="form-control" placeholder="Contoh: 62812345678">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="orderForm">
+            <div id="productList"></div>
+        </form>
+
+        <div class="spacer-bottom"></div>
+    </div>
+
+    <div class="total-sticky">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-6 col-md-8">
+                    <small class="text-muted">Total Estimasi:</small>
+                    <h3 class="mb-0 text-primary fw-bold" id="grandTotal">Rp 0</h3>
+                </div>
+                <div class="col-6 col-md-4 text-end">
+                    <button onclick="kirimPesanan()" class="btn btn-success btn-lg w-100">
+                        <i class="bi bi-whatsapp"></i> Pesan via WA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Produk sesuai request
+        const products = [
+            {
+                category: "Paket Satuan NAMETAG",
+                items: [
+                    { name: "1 Pcs Nama Kuningan Magnet", price: 50000 },
+                    { name: "1 Pcs Nama Kuningan Kancing", price: 50000 },
+                    { name: "1 Pcs Nama Grafir Resin/Kaca Magnet", price: 50000 },
+                    { name: "1 Pcs Nama Grafir Resin/Kaca Kancing", price: 50000 },
+                    { name: "1 Pcs Nama Grafir Biasa Magnet", price: 50000 },
+                    { name: "1 Pcs Nama Grafir Biasa Kancing", price: 50000 }
+                ]
+            },
+            {
+                category: "Paket COMBO DOBEL NAMETAG + PIN KORPRI BIASA",
+                items: [
+                    { name: "1 Pcs Nama Kuningan Magnet + Pin Korpri (K/M)", price: 80000 },
+                    { name: "1 Pcs Nama Kuningan Kancing + Pin Korpri (K/M)", price: 80000 },
+                    { name: "1 Pcs Nama Grafir Resin/Kaca Magnet + Pin Korpri (K/M)", price: 80000 },
+                    { name: "1 Pcs Nama Grafir Resin/Kaca Kancing + Pin Korpri (K/M)", price: 80000 },
+                    { name: "1 Pcs Nama Grafir Biasa Magnet + Pin Korpri (K/M)", price: 80000 },
+                    { name: "1 Pcs Nama Grafir Biasa Kancing + Pin Korpri (K/M)", price: 80000 }
+                ]
+            },
+            {
+                category: "Paket COMBO DOBEL NAMETAG + PIN KORPRI BESAR",
+                items: [
+                    { name: "1 Pcs Nama Kuningan Magnet + Pin Korpri BESAR (K/M)", price: 100000 },
+                    { name: "1 Pcs Nama Kuningan Kancing + Pin Korpri BESAR (K/M)", price: 100000 },
+                    { name: "1 Pcs Nama Grafir Resin/Kaca Magnet + Pin Korpri BESAR (K/M)", price: 100000 },
+                    { name: "1 Pcs Nama Grafir Resin/Kaca Kancing + Pin Korpri BESAR (K/M)", price: 100000 },
+                    { name: "1 Pcs Nama Grafir Biasa Magnet + Pin Korpri BESAR (K/M)", price: 100000 },
+                    { name: "1 Pcs Nama Grafir Biasa Kancing + Pin Korpri BESAR (K/M)", price: 100000 }
+                ]
+            },
+            {
+                category: "Paket COMBO TRIPLE NAMETAG + PIN KORPRI BIASA",
+                items: [
+                    { name: "2 Pcs Nama Kuningan Magnet + Pin Korpri (K/M)", price: 120000 },
+                    { name: "2 Pcs Nama Kuningan Kancing + Pin Korpri (K/M)", price: 120000 },
+                    { name: "2 Pcs Nama Grafir Resin/Kaca Magnet + Pin Korpri (K/M)", price: 120000 },
+                    { name: "2 Pcs Nama Grafir Resin/Kaca Kancing + Pin Korpri (K/M)", price: 120000 },
+                    { name: "2 Pcs Nama Grafir Biasa Magnet + Pin Korpri (K/M)", price: 120000 },
+                    { name: "2 Pcs Nama Grafir Biasa Kancing + Pin Korpri (K/M)", price: 120000 }
+                ]
+            },
+            {
+                category: "Paket Satuan PIN KORPRI BIASA",
+                items: [
+                    { name: "1 Pcs Pin Korpri Magnet", price: 50000 },
+                    { name: "1 Pcs Pin Korpri Kancing", price: 50000 },
+                    { name: "1 Pcs Pin Korpri BESAR Magnet", price: 70000 },
+                    { name: "1 Pcs Pin Korpri BESAR Kancing", price: 70000 }
+                ]
+            }
+        ];
+
+        // Format Currency IDR
+        const formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+        }
+
+        // Render Produk ke HTML
+        const productListDiv = document.getElementById('productList');
+        let itemIndex = 0;
+
+        products.forEach(cat => {
+            let catHTML = `<div class="category-title">${cat.category}</div>`;
+            cat.items.forEach(item => {
+                catHTML += `
+                <div class="product-card" id="card-${itemIndex}">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 mb-2">
+                            <h5 class="mb-1">${item.name}</h5>
+                            <span class="price-tag">${formatRupiah(item.price)}</span> / paket
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <label class="form-label small text-muted">Jumlah</label>
+                                    <input type="number" min="0" class="form-control qty-input" 
+                                        data-price="${item.price}" data-name="${item.name}" 
+                                        data-index="${itemIndex}" value="0" onchange="calculateTotal()" onkeyup="calculateTotal()">
+                                </div>
+                                <div class="col-8">
+                                    <label class="form-label small text-muted">Total Harga Item</label>
+                                    <input type="text" class="form-control bg-light subtotal-display" id="subtotal-${itemIndex}" value="Rp 0" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label class="form-label small fw-bold">Keterangan (Nama, Jabatan, dll)</label>
+                            <textarea class="form-control notes-input" rows="2" maxlength="300" placeholder="Tulis nama yang akan dicetak di sini... (Maks 300 kar)" onkeyup="updateCharCount(this, ${itemIndex})"></textarea>
+                            <div class="char-count" id="char-count-${itemIndex}">0/300</div>
+                        </div>
+                    </div>
+                </div>`;
+                itemIndex++;
+            });
+            productListDiv.innerHTML += catHTML;
+        });
+
+        // Hitung Karakter
+        function updateCharCount(textarea, index) {
+            const count = textarea.value.length;
+            document.getElementById(`char-count-${index}`).innerText = `${count}/300`;
+        }
+
+        // Hitung Total Belanja
+        function calculateTotal() {
+            let grandTotal = 0;
+            const inputs = document.querySelectorAll('.qty-input');
+            
+            inputs.forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                const price = parseInt(input.getAttribute('data-price'));
+                const index = input.getAttribute('data-index');
+                
+                const subTotal = qty * price;
+                document.getElementById(`subtotal-${index}`).value = formatRupiah(subTotal);
+                
+                grandTotal += subTotal;
+                
+                // Highlight card jika ada order
+                const card = document.getElementById(`card-${index}`);
+                if(qty > 0) {
+                    card.style.borderColor = "#198754";
+                    card.style.backgroundColor = "#f8fffb";
+                } else {
+                    card.style.borderColor = "#dee2e6";
+                    card.style.backgroundColor = "white";
+                }
+            });
+
+            document.getElementById('grandTotal').innerText = formatRupiah(grandTotal);
+        }
+
+        // Fungsi Kirim ke WhatsApp
+        function kirimPesanan() {
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            
+            if(!name) { alert("Mohon isi Nama Pemesan"); return; }
+
+            let message = `*HALO, SAYA MAU ORDER NAMETAG*\n\n`;
+            message += `Nama: ${name}\n`;
+            message += `No HP: ${phone}\n`;
+            message += `--------------------------------\n`;
+
+            const inputs = document.querySelectorAll('.qty-input');
+            let hasOrder = false;
+            let totalOrder = 0;
+
+            inputs.forEach((input, i) => {
+                const qty = parseInt(input.value) || 0;
+                if(qty > 0) {
+                    hasOrder = true;
+                    const itemName = input.getAttribute('data-name');
+                    const itemPrice = parseInt(input.getAttribute('data-price'));
+                    const subTotal = qty * itemPrice;
+                    const notes = document.querySelectorAll('.notes-input')[i].value;
+
+                    message += `📦 *${itemName}*\n`;
+                    message += `   Jumlah: ${qty} x ${formatRupiah(itemPrice)} = ${formatRupiah(subTotal)}\n`;
+                    message += `   📝 Ket: ${notes ? notes : '-'}\n\n`;
+                    
+                    totalOrder += subTotal;
+                }
+            });
+
+            message += `--------------------------------\n`;
+            message += `*TOTAL BAYAR: ${formatRupiah(totalOrder)}*`;
+
+            if(!hasOrder) {
+                alert("Anda belum memilih item apapun.");
+                return;
+            }
+
+            // Ganti nomor admin di sini (format 62...)
+            const adminNumber = "62895405882110"; 
+            
+            const encodedMessage = encodeURIComponent(message);
+            const waLink = `https://wa.me/${adminNumber}?text=${encodedMessage}`;
+            
+            window.open(waLink, '_blank');
+        }
+    </script>
+</body>
+</html>
