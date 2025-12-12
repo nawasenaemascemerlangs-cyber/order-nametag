@@ -24,7 +24,7 @@
 
     <div class="header-app text-center">
         <div class="container">
-            <h1>Aplikasi Order Nametag</h1>
+            <h1>Toko Bogor Order Nametag</h1>
             <p class="lead mb-0">Silakan isi jumlah pesanan dan keterangan di bawah ini</p>
         </div>
     </div>
@@ -34,13 +34,17 @@
             <div class="card-header bg-white fw-bold">Data Pemesan</div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Nama Pemesan</label>
                         <input type="text" id="custName" class="form-control" placeholder="Nama Lengkap">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Nomor WhatsApp</label>
                         <input type="number" id="custPhone" class="form-control" placeholder="Contoh: 62812345678">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Pesanan Diterima Oleh</label>
+                        <input type="text" id="acceptedBy" class="form-control" maxlength="15" placeholder="Maks 15 Karakter">
                     </div>
                 </div>
             </div>
@@ -211,12 +215,16 @@
         function kirimPesanan() {
             const name = document.getElementById('custName').value;
             const phone = document.getElementById('custPhone').value;
+            // Ambil data dari kolom baru
+            const acceptedBy = document.getElementById('acceptedBy').value; 
             
             if(!name) { alert("Mohon isi Nama Pemesan"); return; }
 
             let message = `*HALO, SAYA MAU ORDER NAMETAG*\n\n`;
             message += `Nama: ${name}\n`;
             message += `No HP: ${phone}\n`;
+            // Tambahkan data penerima ke pesan WA
+            message += `Diterima Oleh: ${acceptedBy ? acceptedBy : '-'}\n`; 
             message += `--------------------------------\n`;
 
             const inputs = document.querySelectorAll('.qty-input');
